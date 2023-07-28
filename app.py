@@ -3,6 +3,10 @@ import requests
 import os
 import base64
 from streamlit_option_menu import option_menu
+from pdf2image import convert_from_path
+import tempfile
+import os
+
 
 def save_pdf_from_url(url, file_path):
     response = requests.get(url)
@@ -59,7 +63,7 @@ def main():
 if __name__ == "__main__":
     main()
 
-        if sidebar_selection == 'pdf2_image':
+    if sidebar_selection == 'pdf2_image':
 # Titre de l'application
     st.title("Conversion PDF en images")
 
