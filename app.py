@@ -16,6 +16,14 @@ def get_download_link(file_path):
     href = f'<a href="data:application/pdf;base64,{b64}" download> Télécharger le fichier PDF </a>'
     return href
 
+def convert_pdf_to_images(pdf_file):
+    with tempfile.NamedTemporaryFile(delete=False) as temp_pdf:
+        temp_pdf.write(pdf_file.read())
+        temp_pdf_path = temp_pdf.name
+    images = convert_from_path(temp_pdf_path)
+    os.remove(temp_pdf_path)
+    return images
+
 st.title("URL to PDF Downloader")
 st.write("Entrez l'URL du PDF que vous souhaitez télécharger et obtenir le lien de téléchargement.")
 
@@ -50,3 +58,64 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+        if sidebar_selection == 'pdf2_image':
+# Titre de l'application
+    st.title("Conversion PDF en images")
+
+# Afficher le bouton de téléchargement de fichier PDF
+    uploaded_file = st.file_uploader("Téléchargez un fichier PDF", type="pdf")
+
+# Vérifier si un fichier a été téléchargé
+    if uploaded_file is not None:
+    # Convertir le PDF en images
+        images = convert_pdf_to_images(uploaded_file)
+
+    # Afficher les images en rangées sur Streamlit
+        row_num = len(images) // 3 + 1
+        selected_images = []
+
+    # Afficher le choix pour sélectionner une seule image ou toutes les images
+        choice = st.radio("Choisissez une option :", options=["Choisir une  image", "Choisir toutes les images"])
+
+        if choice == "Choisir une  image":
+            for row in range(row_num):
+                columns = st.columns(3)
+                for i, column in enumerate(columns):
+                    index = row * 3 + i
+                    if index < len(images):
+                    # Afficher l'image et la case à cocher correspondante
+                        image = images[index]
+                        checkbox = column.checkbox(label="", key=f"checkbox_{index}")
+                        if checkbox:
+                            selected_images.append(image)
+                        column.image(image, use_column_width=True)
+
+        else:  # Choisir toutes les images
+            selected_images = images
+
+            for row in range(row_num):
+                columns = st.columns(3)
+                for i, column in enumerate(columns):
+                    index = row * 3 + i
+                    if index < len(images):
+                    # Afficher l'image
+                        column.image(images[index], use_column_width=True)
+
+    # Bouton pour sauvegarder les images sélectionnées
+        if len(selected_images) > 0:
+            st.write("---")
+            save_directory = st.text_input("Chemin de sauvegarde des images", value="chemin/vers/repertoire")
+            if choice == "Choisir toutes les images":
+            
+                if st.button("Sauvegarder toutes les images"):
+                    for i, image in enumerate(images):
+                        image_path = os.path.join(save_directory, f"image_{i}.png")
+                        image.save(image_path, "PNG")
+                    st.success("Toutes les images sauvegardées avec succès!")
+            else:
+                if st.button("Sauvegarder les images sélectionnées"):
+                    for i, image in enumerate(selected_images):
+                        image_path = os.path.join(save_directory, f"image_{i}.png")
+                        image.save(image_path, "PNG")
+                    st.success("Images sauvegardées avec succès!")
